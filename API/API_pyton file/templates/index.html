@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Currency Exchange Rates</title>
+</head>
+<body>
+    <h1>Currency Exchange Rate Viewer</h1>
+
+    <label for="currency">Select Currency:</label>
+    <select id="currency">
+        <option value="usd-cny">USD to CNY</option>
+        <option value="usd-eur">USD to EUR</option>
+    </select>
+
+    <br><br>
+
+    <label for="date">Select Date:</label>
+    <input type="date" id="date">
+
+    <br><br>
+
+    <button onclick="fetchData()">Get Exchange Rate</button>
+
+    <h2>Result:</h2>
+    <div id="result"></div>
+    <script>
+        async function fetchData() {
+          const currency = document.getElementById('currency').value;
+          const date = document.getElementById('date').value;
+      
+          if (!currency || !date) return;
+      
+          // Convert YYYY-MM-DD to M/D/YY (to match DB format like 4/29/25)
+          const jsDate = new Date(date);
+          const shortDateFormat = `${jsDate.getMonth() + 1}/${jsDate.getDate()}/${jsDate.getFullYear().toString().slice(-2)}`;
+      
+          const response = await fetch(`http://127.0.0.1:5000/${currency}`);
+          const data = await response.json();
+      
+          const match = data.find(item => item.Date === shortDateFormat);
+      
+          const resultDiv = document.getElementById('result');
+          if (match) {
+            resultDiv.innerHTML = `
+              <table border="1" cellpadding="6">
+                <tr><th>Date</th><th>Price</th><th>Open</th><th>High</th><th>Low</th><th>Change</th></tr>
+                <tr>
+                  <td>${match.Date}</td>
+                  <td>${match.Price}</td>
+                  <td>${match.Open}</td>
+                  <td>${match.High}</td>
+                  <td>${match.Low}</td>
+                  <td>${match.Change_Percent}</td>
+                </tr>
+              </table>
+            `;
+          } else {
+            resultDiv.innerHTML = `<p>No data found for ${date}.</p>`;
+          }
+        }
+      </script>
+    
+</body>
+</html>
